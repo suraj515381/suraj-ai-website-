@@ -1,0 +1,42 @@
+
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <title>Suraj AI Web</title>
+</head>
+<body style="text-align:center; padding:30px; font-family:sans-serif;">
+  <h1>☀️ Suraj AI Assistant</h1>
+  <button onclick="startListening()">🎤 Speak Now</button>
+  <p id="reply" style="margin-top:30px;"></p>
+
+  <script>
+    const synth = window.speechSynthesis;
+
+    function speak(text) {
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.lang = 'hi-IN';
+      synth.speak(utter);
+      document.getElementById("reply").innerText = text;
+    }
+
+    function startListening() {
+      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = 'hi-IN';
+      recognition.start();
+
+      recognition.onresult = function(event) {
+        const message = event.results[0][0].transcript;
+        fetch('http://localhost:5000/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message })
+        })
+        .then(res => res.json())
+        .then(data => speak(data.reply))
+        .catch(err => speak("उत्तर नहीं मिल सका"));
+      };
+    }
+  </script>
+</body>
+</html>
